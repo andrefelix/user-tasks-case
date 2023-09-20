@@ -30,7 +30,7 @@ export class UsersController {
     return this.usersService.create(body);
   }
 
-  @Put()
+  @Put(':id')
   update(@Param('id', new ParseUUIDPipe()) id: string, @Body() body: UsersDTO) {
     return this.usersService.update({ id, data: body });
   }
