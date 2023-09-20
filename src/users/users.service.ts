@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { Repository } from 'typeorm';
 import { UsersDTO } from './dto/users.dto';
+import { encrypt } from 'src/helpers/encryptation';
 
 @Injectable()
 export class UsersService {
@@ -17,14 +18,20 @@ export class UsersService {
 
   async findOneOrFail(id: string) {
     try {
-      return await this.usersRepository.findOneOrFail({ where: { id } });
+      return await this.usersRepository.findOneOrFail({
+        where: { id },
+        select: { id: true, userName: true },
+      });
     } catch (error) {
       throw new NotFoundException(error?.message);
     }
   }
 
   async create(data: UsersDTO) {
-    const user = this.usersRepository.create(data);
+    const user = this.usersRepository.create({
+      ...data,
+      password: encrypt(data.password),
+    });
     return await this.usersRepository.save(user);
   }
 
@@ -32,7 +39,10 @@ export class UsersService {
     const { id, data } = args;
     const user = await this.findOneOrFail(id);
 
-    this.usersRepository.merge(user, data);
+    this.usersRepository.merge(user, {
+      ...data,
+      password: encrypt(data.password),
+    });
 
     return await this.usersRepository.save(user);
   }
