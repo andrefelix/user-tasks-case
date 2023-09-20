@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { Repository } from 'typeorm';
-import { UsersDTO } from './dto/users.dto';
 import { encrypt } from 'src/helpers/encryptation';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { UpdateUserDTO } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +28,7 @@ export class UsersService {
     }
   }
 
-  async create(data: UsersDTO) {
+  async create(data: CreateUserDTO) {
     const user = this.usersRepository.create({
       ...data,
       password: encrypt(data.password),
@@ -35,16 +36,22 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async update(args: { id: string; data: UsersDTO }) {
+  async update(args: { id: string; data: UpdateUserDTO }) {
     const { id, data } = args;
     const user = await this.findOneOrFail(id);
 
-    this.usersRepository.merge(user, {
-      ...data,
-      password: encrypt(data.password),
-    });
+    if (data.password) {
+      data.password = encrypt(data.password);
+    }
 
-    return await this.usersRepository.save(user);
+    this.usersRepository.merge(user, data);
+
+    const updatedUser = await this.usersRepository.save(user);
+
+    return {
+      id: updatedUser.id,
+      userName: updatedUser.userName,
+    };
   }
 
   async delete(id: string) {
