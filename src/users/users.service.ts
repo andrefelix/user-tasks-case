@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { encrypt } from 'src/helpers/encryptation';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
@@ -26,6 +26,10 @@ export class UsersService {
     } catch (error) {
       throw new NotFoundException(error?.message);
     }
+  }
+
+  async findOne(options: FindOneOptions<UsersEntity>) {
+    return await this.usersRepository.findOne(options);
   }
 
   async create(data: CreateUserDTO) {

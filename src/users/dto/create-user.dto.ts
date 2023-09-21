@@ -7,6 +7,6 @@ export class CreateUserDTO {
   userName: string;
 
   @IsNotEmpty()
-  @Matches(REGEX.password, { message: MESSAGE.passwordInvalid })
+  @Matches(REGEX.password, { message: MESSAGE.invalidPassword })
   password: string;
 }
