@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Encryptor } from 'src/helpers/encryptor';
+import { CreateUserDTO } from 'src/users/dto/create-user.dto';
 import { UsersEntity } from 'src/users/entity/users.entity';
 import { UsersService } from 'src/users/users.service';
 
@@ -25,8 +26,22 @@ export class AuthService {
   }
 
   async login(user: UsersEntity) {
+    console.log(user);
     const payload = { sub: user.id, userName: user.userName };
 
     return { token: this.jwtService.sign(payload) };
+  }
+
+  async signup(data: CreateUserDTO) {
+    const { userName } = data;
+    const foundUser = await this.userService.findOne({ where: { userName } });
+
+    if (foundUser) {
+      throw new BadRequestException('O username já está sendo usado');
+    }
+
+    await this.userService.create(data);
+
+    return { message: 'Usuário criado com suceso' };
   }
 }

@@ -37,6 +37,7 @@ export class UsersService {
       ...data,
       password: Encryptor.hashSync(data.password),
     });
+
     return await this.usersRepository.save(user);
   }
 

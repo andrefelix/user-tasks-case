@@ -5,12 +5,10 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -28,11 +26,6 @@ export class UsersController {
   @Get(':id')
   findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.findOneOrFail(id);
-  }
-
-  @Post()
-  create(@Body() body: CreateUserDTO) {
-    return this.usersService.create(body);
   }
 
   @UseGuards(AuthGuard('jwt'))
