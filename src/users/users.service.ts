@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { FindOneOptions, Repository } from 'typeorm';
-import { encrypt } from 'src/helpers/encryptation';
+import { Encryptor } from 'src/helpers/encryptor';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 
@@ -35,7 +35,7 @@ export class UsersService {
   async create(data: CreateUserDTO) {
     const user = this.usersRepository.create({
       ...data,
-      password: encrypt(data.password),
+      password: Encryptor.hashSync(data.password),
     });
     return await this.usersRepository.save(user);
   }
@@ -45,7 +45,7 @@ export class UsersService {
     const user = await this.findOneOrFail(id);
 
     if (data.password) {
-      data.password = encrypt(data.password);
+      data.password = Encryptor.hashSync(data.password);
     }
 
     this.usersRepository.merge(user, data);

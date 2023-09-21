@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { compare } from 'src/helpers/encryptation';
+import { Encryptor } from 'src/helpers/encryptor';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class AuthService {
       select: { id: true, userName: true, password: true },
     });
 
-    if (!user || !compare(user.password, password)) {
+    if (!user || !Encryptor.compareSync(user.password, password)) {
       return null;
     }
 
