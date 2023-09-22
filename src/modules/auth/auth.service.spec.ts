@@ -21,6 +21,7 @@ describe('AuthService', () => {
   let authService: AuthService;
   let userService: UsersService;
   let encryptor: Encryptor;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,6 +51,7 @@ describe('AuthService', () => {
     authService = module.get<AuthService>(AuthService);
     userService = module.get<UsersService>(UsersService);
     encryptor = module.get<Encryptor>(Encryptor);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -62,6 +64,8 @@ describe('AuthService', () => {
       const result = await authService.validateUser({ ...userEntity });
 
       expect(result).toEqual(userEntity);
+      expect(userService.findOne).toBeCalledTimes(1);
+      expect(encryptor.compareSync).toBeCalledTimes(1);
     });
 
     it('should return null when no user is founded', async () => {
@@ -70,6 +74,8 @@ describe('AuthService', () => {
       const result = await authService.validateUser({ ...userEntity });
 
       expect(result).toBeNull();
+      expect(userService.findOne).toBeCalledTimes(1);
+      expect(encryptor.compareSync).not.toBeCalled();
     });
 
     it('should return null when no match password', async () => {
@@ -78,6 +84,8 @@ describe('AuthService', () => {
       const result = await authService.validateUser({ ...userEntity });
 
       expect(result).toBeNull();
+      expect(userService.findOne).toBeCalledTimes(1);
+      expect(encryptor.compareSync).toBeCalledTimes(1);
     });
   });
 
@@ -86,6 +94,7 @@ describe('AuthService', () => {
       const result = await authService.login({ ...userEntity });
 
       expect(result).toEqual({ token: jwtToken });
+      expect(jwtService.sign).toBeCalledTimes(1);
     });
   });
 
@@ -96,12 +105,16 @@ describe('AuthService', () => {
       const result = await authService.signup(userDTO);
 
       expect(result).toEqual({ message: 'Usuário criado com suceso' });
+      expect(userService.findOne).toBeCalledTimes(1);
+      expect(userService.create).toBeCalledTimes(1);
     });
 
     it('should throw a bad request exception', () => {
       expect(authService.signup(userDTO)).rejects.toThrowError(
         BadRequestException,
       );
+      expect(userService.findOne).toBeCalledTimes(1);
+      expect(userService.create).not.toBeCalled();
     });
   });
 });
