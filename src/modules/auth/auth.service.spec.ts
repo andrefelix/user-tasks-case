@@ -11,6 +11,8 @@ const commonUser = new UsersEntity({
   password: 'any.password',
 });
 
+const jwtToken = 'any.jwt.token';
+
 describe('AuthService', () => {
   let authService: AuthService;
   let userService: UsersService;
@@ -26,7 +28,10 @@ describe('AuthService', () => {
             findOne: jest.fn().mockResolvedValue({ ...commonUser }),
           },
         },
-        { provide: JwtService, useValue: {} },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn().mockReturnValue(jwtToken) },
+        },
         {
           provide: Encryptor,
           useValue: {
@@ -68,6 +73,14 @@ describe('AuthService', () => {
       const result = await authService.validateUser({ ...commonUser });
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('login', () => {
+    it('should return jwt token', async () => {
+      const result = await authService.login({ ...commonUser });
+
+      expect(result).toEqual({ token: jwtToken });
     });
   });
 });
