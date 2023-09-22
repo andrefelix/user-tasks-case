@@ -2,20 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { UsersEntity } from '../users/entity/users.entity';
 import { Encryptor } from '../../helpers/encryptor';
-import { UserDTO } from '../users/dto/user.dto';
 import { BadRequestException } from '@nestjs/common';
-
-const userEntity = new UsersEntity({
-  id: 'any.id',
-  userName: 'any.userName',
-  password: 'any.password',
-});
-
-const userDTO = new UserDTO({ ...userEntity });
-
-const jwtToken = 'any.jwt.token';
+import {
+  mockUserEntity,
+  mockUserDTO,
+  mockLoginToken,
+} from '../../helpers/test-helpers';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -30,13 +23,13 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: {
-            findOne: jest.fn().mockResolvedValue({ ...userEntity }),
+            findOne: jest.fn().mockResolvedValue({ ...mockUserEntity }),
             create: jest.fn(),
           },
         },
         {
           provide: JwtService,
-          useValue: { sign: jest.fn().mockReturnValue(jwtToken) },
+          useValue: { sign: jest.fn().mockReturnValue(mockLoginToken.token) },
         },
         {
           provide: Encryptor,
@@ -61,9 +54,9 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return a validated user', async () => {
-      const result = await authService.validateUser({ ...userEntity });
+      const result = await authService.validateUser({ ...mockUserEntity });
 
-      expect(result).toEqual(userEntity);
+      expect(result).toEqual(mockUserEntity);
       expect(userService.findOne).toBeCalledTimes(1);
       expect(encryptor.compareSync).toBeCalledTimes(1);
     });
@@ -71,7 +64,7 @@ describe('AuthService', () => {
     it('should return null when no user is founded', async () => {
       jest.spyOn(userService, 'findOne').mockResolvedValueOnce(null);
 
-      const result = await authService.validateUser({ ...userEntity });
+      const result = await authService.validateUser({ ...mockUserEntity });
 
       expect(result).toBeNull();
       expect(userService.findOne).toBeCalledTimes(1);
@@ -81,7 +74,7 @@ describe('AuthService', () => {
     it('should return null when no match password', async () => {
       jest.spyOn(encryptor, 'compareSync').mockReturnValueOnce(false);
 
-      const result = await authService.validateUser({ ...userEntity });
+      const result = await authService.validateUser({ ...mockUserEntity });
 
       expect(result).toBeNull();
       expect(userService.findOne).toBeCalledTimes(1);
@@ -91,9 +84,9 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return jwt token', async () => {
-      const result = await authService.login({ ...userEntity });
+      const result = await authService.login({ ...mockUserEntity });
 
-      expect(result).toEqual({ token: jwtToken });
+      expect(result).toEqual(mockLoginToken);
       expect(jwtService.sign).toBeCalledTimes(1);
     });
   });
@@ -102,7 +95,7 @@ describe('AuthService', () => {
     it('should create a user sucessuflly', async () => {
       jest.spyOn(userService, 'findOne').mockResolvedValueOnce(null);
 
-      const result = await authService.signup(userDTO);
+      const result = await authService.signup(mockUserDTO);
 
       expect(result).toEqual({ message: 'Usuário criado com suceso' });
       expect(userService.findOne).toBeCalledTimes(1);
@@ -110,7 +103,7 @@ describe('AuthService', () => {
     });
 
     it('should throw a bad request exception', () => {
-      expect(authService.signup(userDTO)).rejects.toThrowError(
+      expect(authService.signup(mockUserDTO)).rejects.toThrowError(
         BadRequestException,
       );
       expect(userService.findOne).toBeCalledTimes(1);
