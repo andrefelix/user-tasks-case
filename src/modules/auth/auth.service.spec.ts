@@ -83,4 +83,10 @@ describe('AuthService', () => {
       expect(result).toEqual({ token: jwtToken });
     });
   });
+
+  describe('signup', () => {
+    it('should create a user sucessuflly', async () => {
+      // const result = await authService.signup();
+    });
+  });
 });

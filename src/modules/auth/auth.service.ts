@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Encryptor } from '../../helpers/encryptor';
-import { CreateUserDTO } from 'src/modules/users/dto/create-user.dto';
+import { UserDTO } from 'src/modules/users/dto/user.dto';
 import { UsersEntity } from 'src/modules/users/entity/users.entity';
 import { UsersService } from '../../modules/users/users.service';
 
@@ -13,7 +13,7 @@ export class AuthService {
     private encryptor: Encryptor,
   ) {}
 
-  async validateUser({ userName, password }: CreateUserDTO) {
+  async validateUser({ userName, password }: UserDTO) {
     const user = await this.userService.findOne({
       where: { userName },
       select: { id: true, userName: true, password: true },
@@ -32,7 +32,7 @@ export class AuthService {
     return { token: this.jwtService.sign(payload) };
   }
 
-  async signup(data: CreateUserDTO) {
+  async signup(data: UserDTO) {
     const { userName } = data;
     const foundUser = await this.userService.findOne({ where: { userName } });
 

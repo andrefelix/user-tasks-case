@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { Encryptor } from '../../helpers/encryptor';
-import { CreateUserDTO } from './dto/create-user.dto';
+import { UserDTO } from './dto/user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class UsersService {
     return await this.usersRepository.findOne(options);
   }
 
-  async create(data: CreateUserDTO) {
+  async create(data: UserDTO) {
     const user = this.usersRepository.create({
       ...data,
       password: this.encryptor.hashSync(data.password),
