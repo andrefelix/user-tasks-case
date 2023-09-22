@@ -10,25 +10,25 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDTO } from './dto/update-user.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards/jwt.guards';
 
 @Controller('api/v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.findOneOrFail(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -37,7 +37,7 @@ export class UsersController {
     return this.usersService.update({ id, data: body });
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete()
   delete(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.delete(id);
