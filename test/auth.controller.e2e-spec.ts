@@ -1,6 +1,10 @@
 import * as request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  INestApplication,
+} from '@nestjs/common';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { LocalEstrategy } from 'src/modules/auth/estrategies/local.estrategy';
@@ -10,6 +14,9 @@ import {
   mockUserDTO,
   mockLoginToken,
 } from 'src/helpers/test-helpers';
+
+const BASE_URL = '/api/v1/auth';
+const mockUserCretedSucessfully = { message: 'Usuário criado com suceso' };
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -26,6 +33,7 @@ describe('AuthController', () => {
           useValue: {
             login: jest.fn().mockResolvedValue({ ...mockLoginToken }),
             validateUser: jest.fn().mockResolvedValue({ ...mockUserEntity }),
+            signup: jest.fn().mockResolvedValue(mockUserCretedSucessfully),
           },
         },
       ],
@@ -50,7 +58,7 @@ describe('AuthController', () => {
   describe('/POST login', () => {
     it(`should return login token sucessfully`, () => {
       return request(app.getHttpServer())
-        .post('/api/v1/auth/login')
+        .post(BASE_URL + '/login')
         .send({ ...mockUserDTO })
         .expect(HttpStatus.OK, mockLoginToken);
     });
@@ -65,9 +73,35 @@ describe('AuthController', () => {
       };
 
       return request(app.getHttpServer())
-        .post('/api/v1/auth/login')
+        .post(BASE_URL + '/login')
         .send({ ...mockUserDTO })
         .expect(HttpStatus.UNAUTHORIZED, unauthorizedBody);
+    });
+  });
+
+  describe('/POST signup', () => {
+    it(`should return created user sucessfully`, () => {
+      return request(app.getHttpServer())
+        .post(BASE_URL + '/signup')
+        .send({ ...mockUserDTO })
+        .expect(HttpStatus.CREATED, mockUserCretedSucessfully);
+    });
+
+    it(`should return created user sucessfully`, () => {
+      const badRequestBody = {
+        message: 'O username já está sendo usado',
+        statusCode: HttpStatus.BAD_REQUEST,
+        error: 'Bad Request',
+      };
+
+      jest
+        .spyOn(authService, 'signup')
+        .mockRejectedValueOnce(new BadRequestException(badRequestBody.message));
+
+      return request(app.getHttpServer())
+        .post(BASE_URL + '/signup')
+        .send({ ...mockUserDTO })
+        .expect(HttpStatus.BAD_REQUEST, badRequestBody);
     });
   });
 });
