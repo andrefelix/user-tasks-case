@@ -38,34 +38,36 @@ describe('AuthController', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   it('should be defined', () => {
     expect(authController).toBeDefined();
     expect(authService).toBeDefined();
   });
 
-  it(`/POST login sucessfully`, () => {
-    return request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ ...mockUserDTO })
-      .expect(HttpStatus.OK, mockLoginToken);
-  });
+  describe('/POST login', () => {
+    it(`should return login token sucessfully`, () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ ...mockUserDTO })
+        .expect(HttpStatus.OK, mockLoginToken);
+    });
 
-  it(`/POST login unauthorized`, () => {
-    jest.spyOn(authService, 'validateUser').mockResolvedValueOnce(null);
+    it(`should refuse access with unauthorized exception`, () => {
+      jest.spyOn(authService, 'validateUser').mockResolvedValueOnce(null);
 
-    const unauthorizedBody = {
-      message: MESSAGE.invalidAuthentication,
-      statusCode: HttpStatus.UNAUTHORIZED,
-      error: 'Unauthorized',
-    };
+      const unauthorizedBody = {
+        message: MESSAGE.invalidAuthentication,
+        statusCode: HttpStatus.UNAUTHORIZED,
+        error: 'Unauthorized',
+      };
 
-    return request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({ ...mockUserDTO })
-      .expect(HttpStatus.UNAUTHORIZED, unauthorizedBody);
-  });
-
-  afterAll(async () => {
-    await app.close();
+      return request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ ...mockUserDTO })
+        .expect(HttpStatus.UNAUTHORIZED, unauthorizedBody);
+    });
   });
 });
