@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from 'src/modules/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { LocalEstrategy } from './estrategies/local.estrategy';
+import { LocalStrategy } from './estrategies/local.strategy';
 import { JwtStrategy } from './estrategies/jwt.estrategy';
 import { Encryptor } from 'src/helpers/encryptor';
 
@@ -20,6 +20,6 @@ import { Encryptor } from 'src/helpers/encryptor';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalEstrategy, JwtStrategy, Encryptor],
+  providers: [AuthService, LocalStrategy, JwtStrategy, Encryptor],
 })
 export class AuthModule {}

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { AuthService } from 'src/modules/auth/auth.service';
-import { LocalEstrategy } from 'src/modules/auth/estrategies/local.estrategy';
+import { LocalStrategy } from 'src/modules/auth/estrategies/local.strategy';
 import { MESSAGE } from 'src/helpers/message';
 import {
   mockUserEntity,
@@ -27,7 +27,7 @@ describe('AuthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
-        LocalEstrategy,
+        LocalStrategy,
         {
           provide: AuthService,
           useValue: {
