@@ -69,6 +69,6 @@ export class UsersService {
 
   async delete(id: string) {
     await this.findOneOrFail(id);
-    this.usersRepository.softDelete(id);
+    await this.usersRepository.softDelete(id);
   }
 }

@@ -25,6 +25,7 @@ describe('AuthService', () => {
             create: jest.fn(),
             save: jest.fn().mockResolvedValue(mockUserDTO),
             merge: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         {
@@ -109,7 +110,7 @@ describe('AuthService', () => {
   describe('update', () => {
     const userId = mockUserDTO.id;
     const updatedUserDTO = {
-      id: mockUserEntity.id,
+      id: mockUserDTO.id,
       userName: 'updated name',
     };
 
@@ -156,6 +157,20 @@ describe('AuthService', () => {
           data: { ...updatedUserDTO },
         }),
       ).rejects.toThrowError(NotFoundException);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete a user', async () => {
+      await usersService.delete(mockUserDTO.id);
+    });
+
+    it('should throw not found exception', () => {
+      jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
+
+      expect(usersService.delete(mockUserDTO.id)).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 });
