@@ -11,10 +11,16 @@ import { Encryptor } from 'src/helpers/encryptor';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from 'src/modules/auth/estrategies/jwt.estrategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { mockRandomUUID, mockUserEntity } from 'src/helpers/test-helpers';
+import {
+  mockRandomUUID,
+  mockUserDTO,
+  mockUserEntity,
+} from 'src/helpers/test-helpers';
+import { UpdateUserDTO } from 'src/modules/users/dto/update-user.dto';
 
 const BASE_URL = '/api/v1/users';
 const usersEntityList = [mockUserEntity];
+const updatedUser = { ...mockUserDTO } as UpdateUserDTO;
 
 describe('UsersController', () => {
   let usersController: UsersController;
@@ -39,6 +45,7 @@ describe('UsersController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue(usersEntityList),
             findOneOrFail: jest.fn().mockResolvedValue(mockUserEntity),
+            update: jest.fn().mockResolvedValue(updatedUser),
           },
         },
         { provide: Encryptor, useValue: {} },
@@ -97,6 +104,28 @@ describe('UsersController', () => {
 
       return request(app.getHttpServer())
         .get(`${BASE_URL}/${mockRandomUUID}`)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('/PUT update', () => {
+    it('should return a updated user', () => {
+      return request(app.getHttpServer())
+        .put(`${BASE_URL}/${mockRandomUUID}`)
+        .send(updatedUser)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.OK, updatedUser);
+    });
+
+    it('should throw a not found exception error', () => {
+      jest
+        .spyOn(usersService, 'update')
+        .mockRejectedValueOnce(new NotFoundException());
+
+      return request(app.getHttpServer())
+        .put(`${BASE_URL}/${mockRandomUUID}`)
+        .send(updatedUser)
         .set('Authorization', mockHeaderAuthorization)
         .expect(HttpStatus.NOT_FOUND);
     });
