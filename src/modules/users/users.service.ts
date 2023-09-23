@@ -30,7 +30,11 @@ export class UsersService {
   }
 
   async findOne(options: FindOneOptions<UsersEntity>) {
-    return await this.usersRepository.findOne(options);
+    try {
+      return await this.usersRepository.findOne(options);
+    } catch (error) {
+      return null;
+    }
   }
 
   async create(data: UserDTO) {

@@ -20,6 +20,7 @@ describe('AuthService', () => {
           useValue: {
             find: jest.fn().mockResolvedValue([mockUserEntity]),
             findOneOrFail: jest.fn().mockResolvedValue(mockUserDTO),
+            findOne: jest.fn().mockResolvedValue(mockUserEntity),
           },
         },
         {
@@ -66,6 +67,26 @@ describe('AuthService', () => {
         usersService.findOneOrFail(mockUserEntity.id),
       ).rejects.toThrowError(NotFoundException);
       expect(usersEntityRepository.findOneOrFail).toBeCalledTimes(1);
+    });
+  });
+
+  describe('findOne', () => {
+    const findOneOptions = { where: { id: mockUserEntity.id } };
+
+    it('should return a founded user', async () => {
+      const result = await usersService.findOne(findOneOptions);
+
+      expect(result).toEqual(mockUserEntity);
+      expect(usersEntityRepository.findOne).toBeCalledTimes(1);
+    });
+
+    it('should return null', async () => {
+      jest.spyOn(usersEntityRepository, 'findOne').mockRejectedValueOnce(null);
+
+      const result = await usersService.findOne(findOneOptions);
+
+      expect(result).toBeNull();
+      expect(usersEntityRepository.findOne).toBeCalledTimes(1);
     });
   });
 });
