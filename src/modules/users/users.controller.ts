@@ -13,11 +13,12 @@ import {
 import { UsersService } from './users.service';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guards';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersEntity } from './entity/users.entity';
 import { NotFoundExceptionSwagger } from 'src/helpers/errors.swagger';
 
 @Controller('api/v1/users')
+@ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
