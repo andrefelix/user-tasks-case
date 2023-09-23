@@ -46,7 +46,10 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async update(args: { id: string; data: UpdateUserDTO }) {
+  async update(args: {
+    id: string;
+    data: UpdateUserDTO;
+  }): Promise<UpdateUserDTO> {
     const { id, data } = args;
     const user = await this.findOneOrFail(id);
 
@@ -61,7 +64,7 @@ export class UsersService {
     return {
       id: updatedUser.id,
       userName: updatedUser.userName,
-    };
+    } as UpdateUserDTO;
   }
 
   async delete(id: string) {

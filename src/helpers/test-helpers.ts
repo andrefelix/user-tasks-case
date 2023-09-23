@@ -5,6 +5,9 @@ export const mockUserEntity = new UsersEntity({
   id: 'any.id',
   userName: 'any.userName',
   password: 'any.password',
+  createdAt: undefined,
+  updatedAt: undefined,
+  deletedAt: undefined,
 });
 
 export const mockUserDTO = new UserDTO({ ...mockUserEntity });

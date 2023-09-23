@@ -10,6 +10,7 @@ import { NotFoundException } from '@nestjs/common';
 describe('AuthService', () => {
   let usersService: UsersService;
   let usersEntityRepository: Repository<UsersEntity>;
+  let encryptor: Encryptor;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +24,7 @@ describe('AuthService', () => {
             findOne: jest.fn().mockResolvedValue(mockUserEntity),
             create: jest.fn(),
             save: jest.fn().mockResolvedValue(mockUserDTO),
+            merge: jest.fn(),
           },
         },
         {
@@ -38,11 +40,13 @@ describe('AuthService', () => {
     usersEntityRepository = module.get<Repository<UsersEntity>>(
       getRepositoryToken(UsersEntity),
     );
+    encryptor = module.get<Encryptor>(Encryptor);
   });
 
   it('should be defined', () => {
     expect(usersService).toBeDefined();
     expect(usersEntityRepository).toBeDefined();
+    expect(encryptor).toBeDefined();
   });
 
   describe('findAll', () => {
@@ -101,6 +105,48 @@ describe('AuthService', () => {
       expect(result).toEqual(mockUserDTO);
       expect(usersEntityRepository.create).toBeCalledTimes(1);
       expect(usersEntityRepository.save).toBeCalledTimes(1);
+    });
+  });
+
+  describe('update', () => {
+    const userId = mockUserDTO.id;
+    const updatedUserDTO = {
+      id: mockUserEntity.id,
+      userName: 'updated name',
+    };
+
+    it('should update a user', async () => {
+      jest
+        .spyOn(usersEntityRepository, 'save')
+        .mockResolvedValueOnce(updatedUserDTO as UsersEntity);
+
+      const result = await usersService.update({
+        id: userId,
+        data: { ...updatedUserDTO },
+      });
+
+      expect(result).toEqual(updatedUserDTO);
+      expect(usersEntityRepository.findOneOrFail).toBeCalledTimes(1);
+      expect(usersEntityRepository.merge).toBeCalledTimes(1);
+      expect(usersEntityRepository.save).toBeCalledTimes(1);
+    });
+
+    it('should not hash a sended password', async () => {
+      await usersService.update({
+        id: userId,
+        data: { ...updatedUserDTO, password: 'any' },
+      });
+
+      expect(encryptor.hashSync).toBeCalledTimes(1);
+    });
+
+    it('should not hash a not sended password', async () => {
+      await usersService.update({
+        id: userId,
+        data: { ...updatedUserDTO },
+      });
+
+      expect(encryptor.hashSync).not.toBeCalled();
     });
   });
 });
