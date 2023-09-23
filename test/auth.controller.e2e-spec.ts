@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { AuthService } from 'src/modules/auth/auth.service';
-import { LocalStrategy } from 'src/modules/auth/estrategies/local.strategy';
+import { LocalStrategy } from 'src/modules/auth/strategies/local.strategy';
 import { MESSAGE } from 'src/helpers/message';
 import {
   mockUserEntity,
