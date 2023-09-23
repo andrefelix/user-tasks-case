@@ -21,11 +21,15 @@ describe('AuthService', () => {
             find: jest.fn().mockResolvedValue([mockUserEntity]),
             findOneOrFail: jest.fn().mockResolvedValue(mockUserDTO),
             findOne: jest.fn().mockResolvedValue(mockUserEntity),
+            create: jest.fn(),
+            save: jest.fn().mockResolvedValue(mockUserDTO),
           },
         },
         {
           provide: Encryptor,
-          useValue: {},
+          useValue: {
+            hashSync: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -87,6 +91,16 @@ describe('AuthService', () => {
 
       expect(result).toBeNull();
       expect(usersEntityRepository.findOne).toBeCalledTimes(1);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new user', async () => {
+      const result = await usersService.create(mockUserDTO);
+
+      expect(result).toEqual(mockUserDTO);
+      expect(usersEntityRepository.create).toBeCalledTimes(1);
+      expect(usersEntityRepository.save).toBeCalledTimes(1);
     });
   });
 });
