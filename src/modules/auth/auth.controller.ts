@@ -43,6 +43,7 @@ export class AuthController {
   }
 
   @Post('signup')
+  @ApiOperation({ summary: 'Criação de um novo usuário' })
   @ApiResponse({
     status: 201,
     description: 'Usuário criado com suceso',

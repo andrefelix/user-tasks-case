@@ -6,6 +6,7 @@ import { Encryptor } from '../../helpers/encryptor';
 import { mockUserDTO, mockUserEntity } from '../../helpers/test-helpers';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { UpdateUserDTO } from './dto/update-user.dto';
 
 describe('AuthService', () => {
   let usersService: UsersService;
@@ -108,9 +109,8 @@ describe('AuthService', () => {
   });
 
   describe('update', () => {
-    const userId = mockUserDTO.id;
-    const updatedUserDTO = {
-      id: mockUserDTO.id,
+    const updatedUserDTO: UpdateUserDTO = {
+      id: 'any.id',
       userName: 'updated name',
     };
 
@@ -120,7 +120,7 @@ describe('AuthService', () => {
         .mockResolvedValueOnce(updatedUserDTO as UsersEntity);
 
       const result = await usersService.update({
-        id: userId,
+        id: updatedUserDTO.id,
         data: { ...updatedUserDTO },
       });
 
@@ -132,7 +132,7 @@ describe('AuthService', () => {
 
     it('should not hash a sended password', async () => {
       await usersService.update({
-        id: userId,
+        id: updatedUserDTO.id,
         data: { ...updatedUserDTO, password: 'any' },
       });
 
@@ -141,7 +141,7 @@ describe('AuthService', () => {
 
     it('should not hash a not sended password', async () => {
       await usersService.update({
-        id: userId,
+        id: updatedUserDTO.id,
         data: { ...updatedUserDTO },
       });
 
@@ -153,7 +153,7 @@ describe('AuthService', () => {
 
       expect(
         usersService.update({
-          id: userId,
+          id: updatedUserDTO.id,
           data: { ...updatedUserDTO },
         }),
       ).rejects.toThrowError(NotFoundException);
@@ -162,13 +162,13 @@ describe('AuthService', () => {
 
   describe('delete', () => {
     it('should delete a user', async () => {
-      await usersService.delete(mockUserDTO.id);
+      await usersService.delete('any.id');
     });
 
     it('should throw not found exception', () => {
       jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
 
-      expect(usersService.delete(mockUserDTO.id)).rejects.toThrowError(
+      expect(usersService.delete('any.id')).rejects.toThrowError(
         NotFoundException,
       );
     });
