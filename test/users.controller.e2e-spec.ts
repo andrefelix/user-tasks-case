@@ -46,6 +46,7 @@ describe('UsersController', () => {
             findAll: jest.fn().mockResolvedValue(usersEntityList),
             findOneOrFail: jest.fn().mockResolvedValue(mockUserEntity),
             update: jest.fn().mockResolvedValue(updatedUser),
+            delete: jest.fn(),
           },
         },
         { provide: Encryptor, useValue: {} },
@@ -126,6 +127,26 @@ describe('UsersController', () => {
       return request(app.getHttpServer())
         .put(`${BASE_URL}/${mockRandomUUID}`)
         .send(updatedUser)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('/PUT delete', () => {
+    it('should delete a user', () => {
+      return request(app.getHttpServer())
+        .delete(`${BASE_URL}/${mockRandomUUID}`)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.NO_CONTENT);
+    });
+
+    it('should throw a not found exception error', () => {
+      jest
+        .spyOn(usersService, 'delete')
+        .mockRejectedValueOnce(new NotFoundException());
+
+      return request(app.getHttpServer())
+        .delete(`${BASE_URL}/${mockRandomUUID}`)
         .set('Authorization', mockHeaderAuthorization)
         .expect(HttpStatus.NOT_FOUND);
     });
