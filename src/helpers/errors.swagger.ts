@@ -12,3 +12,5 @@ class GenericError {
 }
 
 export class UnauthorizedExceptionSwagger extends GenericError {}
+
+export class BadRequestExceptionSwagger extends GenericError {}

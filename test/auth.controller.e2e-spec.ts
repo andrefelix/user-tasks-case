@@ -16,7 +16,7 @@ import {
 } from 'src/helpers/test-helpers';
 
 const BASE_URL = '/api/v1/auth';
-const mockUserCretedSucessfully = { message: 'Usuário criado com suceso' };
+const mockUserCreatedSucessfully = { message: 'Usuário criado com suceso' };
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -33,7 +33,7 @@ describe('AuthController', () => {
           useValue: {
             login: jest.fn().mockResolvedValue({ ...mockLoginToken }),
             validateUser: jest.fn().mockResolvedValue({ ...mockUserEntity }),
-            signup: jest.fn().mockResolvedValue(mockUserCretedSucessfully),
+            signup: jest.fn().mockResolvedValue(mockUserCreatedSucessfully),
           },
         },
       ],
@@ -84,7 +84,7 @@ describe('AuthController', () => {
       return request(app.getHttpServer())
         .post(BASE_URL + '/signup')
         .send({ ...mockUserDTO })
-        .expect(HttpStatus.CREATED, mockUserCretedSucessfully);
+        .expect(HttpStatus.CREATED, mockUserCreatedSucessfully);
     });
 
     it(`should return created user sucessfully`, () => {
