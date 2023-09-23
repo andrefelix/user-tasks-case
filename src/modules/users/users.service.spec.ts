@@ -9,7 +9,7 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let usersService: UsersService;
-  let usersEntityRepository: Repository<UsersEntity>;
+  let usersRepository: Repository<UsersEntity>;
   let encryptor: Encryptor;
 
   beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('AuthService', () => {
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
-    usersEntityRepository = module.get<Repository<UsersEntity>>(
+    usersRepository = module.get<Repository<UsersEntity>>(
       getRepositoryToken(UsersEntity),
     );
     encryptor = module.get<Encryptor>(Encryptor);
@@ -45,7 +45,7 @@ describe('AuthService', () => {
 
   it('should be defined', () => {
     expect(usersService).toBeDefined();
-    expect(usersEntityRepository).toBeDefined();
+    expect(usersRepository).toBeDefined();
     expect(encryptor).toBeDefined();
   });
 
@@ -54,7 +54,7 @@ describe('AuthService', () => {
       const result = await usersService.findAll();
 
       expect(result).toEqual([mockUserEntity]);
-      expect(usersEntityRepository.find).toBeCalledTimes(1);
+      expect(usersRepository.find).toBeCalledTimes(1);
     });
   });
 
@@ -63,18 +63,16 @@ describe('AuthService', () => {
       const result = await usersService.findOneOrFail(mockUserEntity.id);
 
       expect(result).toEqual(mockUserDTO);
-      expect(usersEntityRepository.findOneOrFail).toBeCalledTimes(1);
+      expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
     });
 
     it('should throw a not found exception error', async () => {
-      jest
-        .spyOn(usersEntityRepository, 'findOneOrFail')
-        .mockRejectedValueOnce(null);
+      jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
 
       expect(
         usersService.findOneOrFail(mockUserEntity.id),
       ).rejects.toThrowError(NotFoundException);
-      expect(usersEntityRepository.findOneOrFail).toBeCalledTimes(1);
+      expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
     });
   });
 
@@ -85,16 +83,16 @@ describe('AuthService', () => {
       const result = await usersService.findOne(findOneOptions);
 
       expect(result).toEqual(mockUserEntity);
-      expect(usersEntityRepository.findOne).toBeCalledTimes(1);
+      expect(usersRepository.findOne).toBeCalledTimes(1);
     });
 
     it('should return null', async () => {
-      jest.spyOn(usersEntityRepository, 'findOne').mockRejectedValueOnce(null);
+      jest.spyOn(usersRepository, 'findOne').mockRejectedValueOnce(null);
 
       const result = await usersService.findOne(findOneOptions);
 
       expect(result).toBeNull();
-      expect(usersEntityRepository.findOne).toBeCalledTimes(1);
+      expect(usersRepository.findOne).toBeCalledTimes(1);
     });
   });
 
@@ -103,8 +101,8 @@ describe('AuthService', () => {
       const result = await usersService.create(mockUserDTO);
 
       expect(result).toEqual(mockUserDTO);
-      expect(usersEntityRepository.create).toBeCalledTimes(1);
-      expect(usersEntityRepository.save).toBeCalledTimes(1);
+      expect(usersRepository.create).toBeCalledTimes(1);
+      expect(usersRepository.save).toBeCalledTimes(1);
     });
   });
 
@@ -117,7 +115,7 @@ describe('AuthService', () => {
 
     it('should update a user', async () => {
       jest
-        .spyOn(usersEntityRepository, 'save')
+        .spyOn(usersRepository, 'save')
         .mockResolvedValueOnce(updatedUserDTO as UsersEntity);
 
       const result = await usersService.update({
@@ -126,9 +124,9 @@ describe('AuthService', () => {
       });
 
       expect(result).toEqual(updatedUserDTO);
-      expect(usersEntityRepository.findOneOrFail).toBeCalledTimes(1);
-      expect(usersEntityRepository.merge).toBeCalledTimes(1);
-      expect(usersEntityRepository.save).toBeCalledTimes(1);
+      expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
+      expect(usersRepository.merge).toBeCalledTimes(1);
+      expect(usersRepository.save).toBeCalledTimes(1);
     });
 
     it('should not hash a sended password', async () => {
@@ -147,6 +145,17 @@ describe('AuthService', () => {
       });
 
       expect(encryptor.hashSync).not.toBeCalled();
+    });
+
+    it('should throw not found exception', () => {
+      jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
+
+      expect(
+        usersService.update({
+          id: userId,
+          data: { ...updatedUserDTO },
+        }),
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 });
