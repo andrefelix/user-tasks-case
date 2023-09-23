@@ -5,6 +5,7 @@ import { FindOneOptions, Repository } from 'typeorm';
 import { Encryptor } from '../../helpers/encryptor';
 import { UserDTO } from './dto/user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
+import { MESSAGE } from '../../helpers/message';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,7 @@ export class UsersService {
         select: { id: true, userName: true },
       });
     } catch (error) {
-      throw new NotFoundException(error?.message);
+      throw new NotFoundException(MESSAGE.notFoundUser);
     }
   }
 
