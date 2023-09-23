@@ -9,7 +9,7 @@ import { UsersController } from 'src/modules/users/users.controller';
 import { UsersService } from 'src/modules/users/users.service';
 import { Encryptor } from 'src/helpers/encryptor';
 import { ConfigModule } from '@nestjs/config';
-import { JwtStrategy } from 'src/modules/auth/estrategies/jwt.estrategy';
+import { JwtStrategy } from 'src/modules/auth/estrategies/jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import {
   mockRandomUUID,
