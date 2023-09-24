@@ -17,3 +17,8 @@ export const mockUserEntity: UsersEntity = {
 export const mockUserDTO = { ...mockUserEntity } as UserDTO;
 
 export const mockLoginToken = { token: 'any.jwt.token' };
+
+export const mockAuthenticatedUser = {
+  id: 'authenticated.id',
+  userName: 'authenticated.username',
+};

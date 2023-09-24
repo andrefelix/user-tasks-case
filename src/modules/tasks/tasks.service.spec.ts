@@ -5,13 +5,12 @@ import { TasksEntity } from './entity/tasks.entity';
 import { UsersEntity } from '../users/entity/users.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
-import { mockUserEntity } from '../../helpers/test-helpers';
+import {
+  mockAuthenticatedUser,
+  mockUserEntity,
+} from '../../helpers/test-helpers';
 
-const authenticatedUser = {
-  id: 'authenticated.id',
-  userName: 'authenticated.username',
-};
-
+const authenticatedUser = { ...mockAuthenticatedUser };
 const taskEntity = { id: 'any.id', name: 'new task' } as TasksEntity;
 const taskEntityList = [taskEntity];
 
@@ -90,7 +89,7 @@ describe('TasksService', () => {
 
   describe('findAll', () => {
     it('should return a task list', async () => {
-      const result = await tasksService.findAll(authenticatedUser);
+      const result = await tasksService.findAll({ ...mockAuthenticatedUser });
 
       expect(result).toEqual(taskEntityList);
       expect(usersRepository.findOne).toBeCalledTimes(1);
@@ -99,9 +98,9 @@ describe('TasksService', () => {
     it('should throw not found exception', async () => {
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
 
-      expect(tasksService.findAll(authenticatedUser)).rejects.toThrowError(
-        NotFoundException,
-      );
+      expect(
+        tasksService.findAll({ ...mockAuthenticatedUser }),
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 });

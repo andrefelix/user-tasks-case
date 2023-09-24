@@ -3,11 +3,14 @@ import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { Encryptor } from '../../helpers/encryptor';
-import { mockUserDTO, mockUserEntity } from '../../helpers/test-helpers';
+import {
+  mockAuthenticatedUser,
+  mockUserDTO,
+  mockUserEntity,
+} from '../../helpers/test-helpers';
 import { Repository } from 'typeorm';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { UpdateUserDTO } from './dto/update-user.dto';
-import { AuthenticatedUserDTO } from '../auth/dto/authenticated-user.dto';
 
 describe('AuthService', () => {
   let usersService: UsersService;
@@ -110,12 +113,9 @@ describe('AuthService', () => {
   });
 
   describe('update', () => {
-    const updateUserId = 'update.user.id';
+    const authenticatedUser = { ...mockAuthenticatedUser };
+    const updateUserId = authenticatedUser.id;
     const updateUser: UpdateUserDTO = { password: 'updated.password' };
-    const authenticatedUser: AuthenticatedUserDTO = {
-      id: updateUserId,
-      userName: 'any.name',
-    };
 
     it('should update a user', async () => {
       jest
