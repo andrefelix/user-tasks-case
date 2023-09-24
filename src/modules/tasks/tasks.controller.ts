@@ -24,6 +24,17 @@ export class TasksController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiOperation({ summary: 'Retorna lista de tasks do usuário' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de tasks retornada com sucesso',
+    type: [TasksEntity],
+  })
+  @ApiResponse({
+    status: 404,
+    description: MESSAGE.notFoundUser,
+    type: NotFoundExceptionSwagger,
+  })
   findAll(@Request() req) {
     return this.tasksService.findAll(req.user);
   }
