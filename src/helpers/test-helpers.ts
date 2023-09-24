@@ -4,15 +4,16 @@ import { UsersEntity } from '../modules/users/entity/users.entity';
 
 export const mockRandomUUID = randomUUID();
 
-export const mockUserEntity = new UsersEntity({
+export const mockUserEntity: UsersEntity = {
   id: 'any.id',
   userName: 'any.userName',
   password: 'any.password',
   createdAt: undefined,
   updatedAt: undefined,
   deletedAt: undefined,
-});
+  tasks: undefined,
+};
 
-export const mockUserDTO = new UserDTO({ ...mockUserEntity });
+export const mockUserDTO = { ...mockUserEntity } as UserDTO;
 
 export const mockLoginToken = { token: 'any.jwt.token' };

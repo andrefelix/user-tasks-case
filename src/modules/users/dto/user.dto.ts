@@ -12,9 +12,4 @@ export class UserDTO {
   @Matches(REGEX.password, { message: MESSAGE.invalidPassword })
   @ApiProperty()
   password: string;
-
-  constructor(user: UserDTO) {
-    this.userName = user.userName;
-    this.password = user.password;
-  }
 }

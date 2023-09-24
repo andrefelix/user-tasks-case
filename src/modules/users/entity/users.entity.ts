@@ -38,13 +38,4 @@ export class UsersEntity {
 
   @OneToMany(() => TasksEntity, (task) => task.user)
   tasks: TasksEntity[];
-
-  constructor(users: Partial<UsersEntity>) {
-    this.id = users?.id;
-    this.userName = users?.userName;
-    this.password = users?.password;
-    this.updatedAt = users?.updatedAt;
-    this.deletedAt = users?.deletedAt;
-    this.tasks = users?.tasks;
-  }
 }
