@@ -7,6 +7,7 @@ import { mockUserDTO, mockUserEntity } from '../../helpers/test-helpers';
 import { Repository } from 'typeorm';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { UpdateUserDTO } from './dto/update-user.dto';
+import { AuthenticatedUserDTO } from '../auth/dto/authenticated-user.dto';
 
 describe('AuthService', () => {
   let usersService: UsersService;
@@ -111,7 +112,7 @@ describe('AuthService', () => {
   describe('update', () => {
     const updateUserId = 'update.user.id';
     const updateUser: UpdateUserDTO = { password: 'updated.password' };
-    const userInfo: Partial<UsersEntity> = {
+    const authenticatedUser: AuthenticatedUserDTO = {
       id: updateUserId,
       userName: 'any.name',
     };
@@ -124,7 +125,7 @@ describe('AuthService', () => {
       await usersService.update({
         id: updateUserId,
         data: { ...updateUser },
-        userInfo,
+        authenticatedUser,
       });
 
       expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
@@ -138,7 +139,7 @@ describe('AuthService', () => {
         usersService.update({
           id: 'invalid.id',
           data: { ...updateUser },
-          userInfo,
+          authenticatedUser,
         }),
       ).rejects.toThrowError(ForbiddenException);
     });
@@ -150,7 +151,7 @@ describe('AuthService', () => {
         usersService.update({
           id: updateUserId,
           data: { ...updateUser },
-          userInfo,
+          authenticatedUser,
         }),
       ).rejects.toThrowError(NotFoundException);
     });

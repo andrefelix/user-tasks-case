@@ -10,6 +10,7 @@ import { Encryptor } from '../../helpers/encryptor';
 import { UserDTO } from './dto/user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { MESSAGE } from '../../helpers/message';
+import { AuthenticatedUserDTO } from '../auth/dto/authenticated-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -54,11 +55,11 @@ export class UsersService {
   async update(args: {
     id: string;
     data: UpdateUserDTO;
-    userInfo: Partial<UsersEntity>;
+    authenticatedUser: AuthenticatedUserDTO;
   }) {
-    const { id, data, userInfo } = args;
+    const { id, data, authenticatedUser } = args;
 
-    if (userInfo.id !== id) {
+    if (authenticatedUser.id !== id) {
       throw new ForbiddenException('Atualização de senha negada');
     }
 

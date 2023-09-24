@@ -5,6 +5,7 @@ import { MESSAGE } from '../../helpers/message';
 import { Repository } from 'typeorm';
 import { TasksEntity } from './entity/tasks.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuthenticatedUserDTO } from '../auth/dto/authenticated-user.dto';
 
 @Injectable()
 export class TasksService {
@@ -17,16 +18,16 @@ export class TasksService {
 
   async create({
     data,
-    userInfo,
+    authenticatedUser,
   }: {
     data: TaskDTO;
-    userInfo: Partial<UsersEntity>;
+    authenticatedUser: AuthenticatedUserDTO;
   }) {
     let user: UsersEntity;
 
     try {
       user = await this.usersRepository.findOneOrFail({
-        where: { id: userInfo.id },
+        where: { id: authenticatedUser.id },
       });
     } catch (error) {
       throw new NotFoundException(MESSAGE.notFoundUser);

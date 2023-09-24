@@ -6,7 +6,10 @@ import { UsersEntity } from '../users/entity/users.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 
-const userInfo = { id: 'any.id' };
+const authenticatedUser = {
+  id: 'authenticated.id',
+  userName: 'authenticated.username',
+};
 const newTask = { name: 'new task' };
 
 describe('TasksService', () => {
@@ -53,7 +56,7 @@ describe('TasksService', () => {
   describe('create', () => {
     const createArgs = {
       data: { ...newTask },
-      userInfo,
+      authenticatedUser,
     };
 
     it('should create a new task', async () => {

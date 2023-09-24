@@ -84,7 +84,11 @@ export class UsersController {
     @Body() body: UpdateUserDTO,
     @Request() req,
   ) {
-    return this.usersService.update({ id, data: body, userInfo: req.user });
+    return this.usersService.update({
+      id,
+      data: body,
+      authenticatedUser: req.user,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
