@@ -68,8 +68,6 @@ export class UsersService {
     this.usersRepository.merge(user, data);
 
     await this.usersRepository.save(user);
-
-    return { message: 'Senha alterada com sucesso' };
   }
 
   async delete(id: string) {

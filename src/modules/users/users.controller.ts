@@ -58,11 +58,11 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  @ApiOperation({ summary: 'Atualiza usuário pelo id' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Altera senha do usuário' })
   @ApiResponse({
-    status: 200,
-    description: 'Usuário atualizado com sucesso',
-    type: UsersEntity,
+    status: 201,
+    description: 'Senha alterada com sucesso',
   })
   @ApiResponse({
     status: 403,
