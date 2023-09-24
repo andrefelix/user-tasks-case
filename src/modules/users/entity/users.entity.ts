@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TaskEntity } from 'src/modules/tasks/entity/task.entity';
+import { TasksEntity } from '../../tasks/entity/tasks.entity';
 import {
   Column,
   CreateDateColumn,
@@ -36,8 +36,8 @@ export class UsersEntity {
   @ApiProperty()
   deletedAt: string;
 
-  @OneToMany(() => TaskEntity, (task) => task.user)
-  tasks: TaskEntity[];
+  @OneToMany(() => TasksEntity, (task) => task.user)
+  tasks: TasksEntity[];
 
   constructor(users: Partial<UsersEntity>) {
     this.id = users?.id;
