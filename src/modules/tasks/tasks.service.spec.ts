@@ -7,12 +7,10 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import {
   mockAuthenticatedUser,
+  mockTaskEntity,
+  mockTaskEntityList,
   mockUserEntity,
 } from '../../helpers/test-helpers';
-
-const authenticatedUser = { ...mockAuthenticatedUser };
-const taskEntity = { id: 'any.id', name: 'new task' } as TasksEntity;
-const taskEntityList = [taskEntity];
 
 describe('TasksService', () => {
   let tasksService: TasksService;
@@ -26,7 +24,7 @@ describe('TasksService', () => {
         {
           provide: getRepositoryToken(TasksEntity),
           useValue: {
-            create: jest.fn().mockReturnValue(taskEntity),
+            create: jest.fn().mockReturnValue(mockTaskEntity),
             save: jest.fn(),
           },
         },
@@ -35,9 +33,10 @@ describe('TasksService', () => {
           useValue: {
             findOneOrFail: jest.fn().mockResolvedValue({}),
             save: jest.fn(),
-            findOne: jest
-              .fn()
-              .mockResolvedValue({ ...mockUserEntity, tasks: taskEntityList }),
+            findOne: jest.fn().mockResolvedValue({
+              ...mockUserEntity,
+              tasks: mockTaskEntityList,
+            }),
           },
         },
       ],
@@ -60,14 +59,14 @@ describe('TasksService', () => {
 
   describe('create', () => {
     const createArgs = {
-      data: { ...taskEntity },
-      authenticatedUser,
+      data: { ...mockTaskEntity },
+      authenticatedUser: { ...mockAuthenticatedUser },
     };
 
     it('should create a new task', async () => {
       const result = await tasksService.create(createArgs);
 
-      expect(result).toEqual(taskEntity);
+      expect(result).toEqual(mockTaskEntity);
       expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
       expect(tasksRepository.create).toBeCalledTimes(1);
       expect(tasksRepository.save).toBeCalledTimes(1);
@@ -91,7 +90,7 @@ describe('TasksService', () => {
     it('should return a task list', async () => {
       const result = await tasksService.findAll({ ...mockAuthenticatedUser });
 
-      expect(result).toEqual(taskEntityList);
+      expect(result).toEqual(mockTaskEntityList);
       expect(usersRepository.findOne).toBeCalledTimes(1);
     });
 

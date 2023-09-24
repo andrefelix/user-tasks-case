@@ -9,14 +9,12 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from 'src/modules/auth/strategies/jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { TasksEntity } from 'src/modules/tasks/entity/tasks.entity';
 import { TasksController } from 'src/modules/tasks/tasks.controller';
 import { TasksService } from 'src/modules/tasks/tasks.service';
 import { TaskDTO } from 'src/modules/tasks/dto/task.dto';
+import { mockTaskEntity, mockTaskEntityList } from 'src/helpers/test-helpers';
 
 const BASE_URL = '/api/v1/tasks';
-const taskEntity = { id: 'any.id', name: 'any task name' } as TasksEntity;
-const taskEntityList = [taskEntity];
 
 describe('TasksController', () => {
   let app: INestApplication;
@@ -39,8 +37,8 @@ describe('TasksController', () => {
         {
           provide: TasksService,
           useValue: {
-            create: jest.fn().mockResolvedValue(taskEntity),
-            findAll: jest.fn().mockResolvedValue(taskEntityList),
+            create: jest.fn().mockResolvedValue(mockTaskEntity),
+            findAll: jest.fn().mockResolvedValue(mockTaskEntityList),
           },
         },
         JwtStrategy,
@@ -77,7 +75,7 @@ describe('TasksController', () => {
         .post(BASE_URL)
         .set('Authorization', mockHeaderAuthorization)
         .send(createTask)
-        .expect(HttpStatus.CREATED, taskEntity);
+        .expect(HttpStatus.CREATED, mockTaskEntity);
     });
 
     it('should throw not found exception when current user is not founded', () => {
@@ -109,7 +107,7 @@ describe('TasksController', () => {
       return request(app.getHttpServer())
         .get(BASE_URL)
         .set('Authorization', mockHeaderAuthorization)
-        .expect(HttpStatus.OK, taskEntityList);
+        .expect(HttpStatus.OK, mockTaskEntityList);
     });
 
     it('should throw not found exception when current user is not founded', () => {
