@@ -5,12 +5,15 @@ import { TasksEntity } from './entity/tasks.entity';
 import { UsersEntity } from '../users/entity/users.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { mockUserEntity } from '../../helpers/test-helpers';
 
 const authenticatedUser = {
   id: 'authenticated.id',
   userName: 'authenticated.username',
 };
-const newTask = { name: 'new task' };
+
+const taskEntity = { id: 'any.id', name: 'new task' } as TasksEntity;
+const taskEntityList = [taskEntity];
 
 describe('TasksService', () => {
   let tasksService: TasksService;
@@ -24,7 +27,7 @@ describe('TasksService', () => {
         {
           provide: getRepositoryToken(TasksEntity),
           useValue: {
-            create: jest.fn().mockReturnValue(newTask),
+            create: jest.fn().mockReturnValue(taskEntity),
             save: jest.fn(),
           },
         },
@@ -33,6 +36,9 @@ describe('TasksService', () => {
           useValue: {
             findOneOrFail: jest.fn().mockResolvedValue({}),
             save: jest.fn(),
+            findOne: jest
+              .fn()
+              .mockResolvedValue({ ...mockUserEntity, tasks: taskEntityList }),
           },
         },
       ],
@@ -55,14 +61,14 @@ describe('TasksService', () => {
 
   describe('create', () => {
     const createArgs = {
-      data: { ...newTask },
+      data: { ...taskEntity },
       authenticatedUser,
     };
 
     it('should create a new task', async () => {
       const result = await tasksService.create(createArgs);
 
-      expect(result).toEqual(newTask);
+      expect(result).toEqual(taskEntity);
       expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
       expect(tasksRepository.create).toBeCalledTimes(1);
       expect(tasksRepository.save).toBeCalledTimes(1);
@@ -79,6 +85,23 @@ describe('TasksService', () => {
       expect(tasksRepository.create).not.toBeCalled();
       expect(tasksRepository.save).not.toBeCalled();
       expect(usersRepository.save).not.toBeCalled();
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return a task list', async () => {
+      const result = await tasksService.findAll(authenticatedUser);
+
+      expect(result).toEqual(taskEntityList);
+      expect(usersRepository.findOne).toBeCalledTimes(1);
+    });
+
+    it('should throw not found exception', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
+
+      expect(tasksService.findAll(authenticatedUser)).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 });
