@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entity/users.entity';
 import { FindOneOptions, Repository } from 'typeorm';
@@ -50,22 +54,22 @@ export class UsersService {
   async update(args: {
     id: string;
     data: UpdateUserDTO;
-  }): Promise<UpdateUserDTO> {
-    const { id, data } = args;
-    const user = await this.findOneOrFail(id);
+    userInfo: Partial<UsersEntity>;
+  }) {
+    const { id, data, userInfo } = args;
 
-    if (data.password) {
-      data.password = this.encryptor.hashSync(data.password);
+    if (userInfo.id !== id) {
+      throw new ForbiddenException('Atualização de senha negada');
     }
 
+    const user = await this.findOneOrFail(id);
+
+    data.password = this.encryptor.hashSync(data.password);
     this.usersRepository.merge(user, data);
 
-    const updatedUser = await this.usersRepository.save(user);
+    await this.usersRepository.save(user);
 
-    return {
-      id: updatedUser.id,
-      userName: updatedUser.userName,
-    } as UpdateUserDTO;
+    return { message: 'Senha alterada com sucesso' };
   }
 
   async delete(id: string) {

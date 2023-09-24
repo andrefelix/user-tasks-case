@@ -1,9 +1,11 @@
-import { UserDTO } from './user.dto';
-import { IsUUID } from 'class-validator';
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsNotEmpty, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { REGEX } from 'src/helpers/regex';
+import { MESSAGE } from 'src/helpers/message';
 
-export class UpdateUserDTO extends PartialType(UserDTO) {
-  @IsUUID()
+export class UpdateUserDTO {
+  @IsNotEmpty({ message: 'O novo password deve ser fornecido' })
+  @Matches(REGEX.password, { message: MESSAGE.invalidPassword })
   @ApiProperty()
-  id: string;
+  password: string;
 }

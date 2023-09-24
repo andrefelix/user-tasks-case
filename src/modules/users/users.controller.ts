@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -15,7 +16,11 @@ import { UpdateUserDTO } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guards';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersEntity } from './entity/users.entity';
-import { NotFoundExceptionSwagger } from 'src/helpers/errors.swagger';
+import {
+  BadRequestExceptionSwagger,
+  ForbiddenExceptionSwagger,
+  NotFoundExceptionSwagger,
+} from 'src/helpers/errors.swagger';
 
 @Controller('api/v1/users')
 @ApiTags('users')
@@ -60,15 +65,26 @@ export class UsersController {
     type: UsersEntity,
   })
   @ApiResponse({
+    status: 403,
+    description: 'Atualização de senha negada',
+    type: ForbiddenExceptionSwagger,
+  })
+  @ApiResponse({
     status: 404,
     description: 'Usuário não encontrado',
     type: NotFoundExceptionSwagger,
   })
+  @ApiResponse({
+    status: 400,
+    description: 'O novo password deve ser fornecido',
+    type: BadRequestExceptionSwagger,
+  })
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: UpdateUserDTO,
+    @Request() req,
   ) {
-    return this.usersService.update({ id, data: body });
+    return this.usersService.update({ id, data: body, userInfo: req.user });
   }
 
   @UseGuards(JwtAuthGuard)
