@@ -16,6 +16,19 @@ export class TasksService {
     private usersRepository: Repository<UsersEntity>,
   ) {}
 
+  async findAll(authenticatedUser: AuthenticatedUserDTO) {
+    const user = await this.usersRepository.findOne({
+      where: { id: authenticatedUser.id },
+      relations: ['tasks'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(MESSAGE.notFoundUser);
+    }
+
+    return user.tasks;
+  }
+
   async create({
     data,
     authenticatedUser,
