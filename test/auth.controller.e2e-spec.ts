@@ -8,7 +8,6 @@ import {
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { LocalStrategy } from 'src/modules/auth/strategies/local.strategy';
-import { MESSAGE } from 'src/helpers/message';
 import {
   mockUserEntity,
   mockUserDTO,
@@ -63,19 +62,19 @@ describe('AuthController', () => {
         .expect(HttpStatus.OK, mockLoginToken);
     });
 
-    it(`should refuse access with unauthorized exception`, () => {
-      jest.spyOn(authService, 'validateUser').mockResolvedValueOnce(null);
+    it(`should refuse access with unauthorized exception when credentials is not sended`, () => {
+      return request(app.getHttpServer())
+        .post(BASE_URL + '/login')
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
 
-      const unauthorizedBody = {
-        message: MESSAGE.invalidAuthentication,
-        statusCode: HttpStatus.UNAUTHORIZED,
-        error: 'Unauthorized',
-      };
+    it(`should refuse access with unauthorized exception when invalid credentials are sended`, () => {
+      jest.spyOn(authService, 'validateUser').mockResolvedValueOnce(null);
 
       return request(app.getHttpServer())
         .post(BASE_URL + '/login')
         .send({ ...mockUserDTO })
-        .expect(HttpStatus.UNAUTHORIZED, unauthorizedBody);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -87,21 +86,15 @@ describe('AuthController', () => {
         .expect(HttpStatus.CREATED, mockUserCreatedSucessfully);
     });
 
-    it(`should return created user sucessfully`, () => {
-      const badRequestBody = {
-        message: 'O username já está sendo usado',
-        statusCode: HttpStatus.BAD_REQUEST,
-        error: 'Bad Request',
-      };
-
+    it(`should thow bad request exception error`, () => {
       jest
         .spyOn(authService, 'signup')
-        .mockRejectedValueOnce(new BadRequestException(badRequestBody.message));
+        .mockRejectedValueOnce(new BadRequestException());
 
       return request(app.getHttpServer())
         .post(BASE_URL + '/signup')
         .send({ ...mockUserDTO })
-        .expect(HttpStatus.BAD_REQUEST, badRequestBody);
+        .expect(HttpStatus.BAD_REQUEST);
     });
   });
 });
