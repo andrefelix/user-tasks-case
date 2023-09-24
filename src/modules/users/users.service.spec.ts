@@ -5,7 +5,7 @@ import { UsersEntity } from './entity/users.entity';
 import { Encryptor } from '../../helpers/encryptor';
 import { mockUserDTO, mockUserEntity } from '../../helpers/test-helpers';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { UpdateUserDTO } from './dto/update-user.dto';
 
 describe('AuthService', () => {
@@ -109,52 +109,58 @@ describe('AuthService', () => {
   });
 
   describe('update', () => {
-    const updatedUserDTO: UpdateUserDTO = {
-      id: 'any.id',
-      userName: 'updated name',
+    const updateUserId = 'update.user.id';
+    const updateUser: UpdateUserDTO = { password: 'updated.password' };
+    const userInfo: Partial<UsersEntity> = {
+      id: updateUserId,
+      userName: 'any.name',
     };
 
     it('should update a user', async () => {
       jest
         .spyOn(usersRepository, 'save')
-        .mockResolvedValueOnce(updatedUserDTO as UsersEntity);
+        .mockResolvedValueOnce(updateUser as UsersEntity);
 
       const result = await usersService.update({
-        id: updatedUserDTO.id,
-        data: { ...updatedUserDTO },
+        id: updateUserId,
+        data: { ...updateUser },
+        userInfo,
       });
 
-      expect(result).toEqual(updatedUserDTO);
+      expect(result).toEqual({ message: 'Senha alterada com sucesso' });
       expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
       expect(usersRepository.merge).toBeCalledTimes(1);
       expect(usersRepository.save).toBeCalledTimes(1);
     });
 
-    it('should not hash a sended password', async () => {
+    it('should hash a sended password', async () => {
       await usersService.update({
-        id: updatedUserDTO.id,
-        data: { ...updatedUserDTO, password: 'any' },
+        id: updateUserId,
+        data: { ...updateUser },
+        userInfo,
       });
 
       expect(encryptor.hashSync).toBeCalledTimes(1);
     });
 
-    it('should not hash a not sended password', async () => {
-      await usersService.update({
-        id: updatedUserDTO.id,
-        data: { ...updatedUserDTO },
-      });
-
-      expect(encryptor.hashSync).not.toBeCalled();
+    it('should throw forbidden exception error', () => {
+      expect(
+        usersService.update({
+          id: 'invalid.id',
+          data: { ...updateUser },
+          userInfo,
+        }),
+      ).rejects.toThrowError(ForbiddenException);
     });
 
-    it('should throw not found exception', () => {
+    it('should throw not found exception error', () => {
       jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
 
       expect(
         usersService.update({
-          id: updatedUserDTO.id,
-          data: { ...updatedUserDTO },
+          id: updateUserId,
+          data: { ...updateUser },
+          userInfo,
         }),
       ).rejects.toThrowError(NotFoundException);
     });
@@ -165,7 +171,7 @@ describe('AuthService', () => {
       await usersService.delete('any.id');
     });
 
-    it('should throw not found exception', () => {
+    it('should throw not found exception error', () => {
       jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValueOnce(null);
 
       expect(usersService.delete('any.id')).rejects.toThrowError(

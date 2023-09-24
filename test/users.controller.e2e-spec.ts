@@ -1,6 +1,7 @@
 import * as request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  BadRequestException,
   HttpStatus,
   INestApplication,
   NotFoundException,
@@ -11,16 +12,12 @@ import { Encryptor } from 'src/helpers/encryptor';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from 'src/modules/auth/strategies/jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import {
-  mockRandomUUID,
-  mockUserDTO,
-  mockUserEntity,
-} from 'src/helpers/test-helpers';
+import { mockRandomUUID, mockUserEntity } from 'src/helpers/test-helpers';
 import { UpdateUserDTO } from 'src/modules/users/dto/update-user.dto';
 
 const BASE_URL = '/api/v1/users';
 const usersEntityList = [mockUserEntity];
-const updatedUser = { ...mockUserDTO } as UpdateUserDTO;
+const updateUser: UpdateUserDTO = { password: 'updated.password' };
 
 describe('UsersController', () => {
   let usersController: UsersController;
@@ -45,7 +42,7 @@ describe('UsersController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue(usersEntityList),
             findOneOrFail: jest.fn().mockResolvedValue(mockUserEntity),
-            update: jest.fn().mockResolvedValue(updatedUser),
+            update: jest.fn().mockResolvedValue(updateUser),
             delete: jest.fn(),
           },
         },
@@ -114,9 +111,23 @@ describe('UsersController', () => {
     it('should return a updated user', () => {
       return request(app.getHttpServer())
         .put(`${BASE_URL}/${mockRandomUUID}`)
-        .send(updatedUser)
+        .send(updateUser)
         .set('Authorization', mockHeaderAuthorization)
-        .expect(HttpStatus.OK, updatedUser);
+        .expect(HttpStatus.OK)
+        .expect((res) => {
+          expect(res.body).toEqual(updateUser);
+        });
+    });
+
+    it('should throw a bad request exception error', () => {
+      jest
+        .spyOn(usersService, 'update')
+        .mockRejectedValueOnce(new BadRequestException());
+
+      return request(app.getHttpServer())
+        .put(`${BASE_URL}/${mockRandomUUID}`)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('should throw a not found exception error', () => {
@@ -126,13 +137,13 @@ describe('UsersController', () => {
 
       return request(app.getHttpServer())
         .put(`${BASE_URL}/${mockRandomUUID}`)
-        .send(updatedUser)
+        .send(updateUser)
         .set('Authorization', mockHeaderAuthorization)
         .expect(HttpStatus.NOT_FOUND);
     });
   });
 
-  describe('/PUT delete', () => {
+  describe('/DELETE delete', () => {
     it('should delete a user', () => {
       return request(app.getHttpServer())
         .delete(`${BASE_URL}/${mockRandomUUID}`)
