@@ -2,6 +2,7 @@ import * as request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
+  ForbiddenException,
   HttpStatus,
   INestApplication,
   NotFoundException,
@@ -113,10 +114,18 @@ describe('UsersController', () => {
         .put(`${BASE_URL}/${mockRandomUUID}`)
         .send(updateUser)
         .set('Authorization', mockHeaderAuthorization)
-        .expect(HttpStatus.OK)
-        .expect((res) => {
-          expect(res.body).toEqual(updateUser);
-        });
+        .expect(HttpStatus.NO_CONTENT);
+    });
+
+    it('should throw forbidden exception error', () => {
+      jest
+        .spyOn(usersService, 'update')
+        .mockRejectedValueOnce(new ForbiddenException());
+
+      return request(app.getHttpServer())
+        .put(`${BASE_URL}/${mockRandomUUID}`)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.FORBIDDEN);
     });
 
     it('should throw a bad request exception error', () => {

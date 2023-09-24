@@ -121,26 +121,16 @@ describe('AuthService', () => {
         .spyOn(usersRepository, 'save')
         .mockResolvedValueOnce(updateUser as UsersEntity);
 
-      const result = await usersService.update({
-        id: updateUserId,
-        data: { ...updateUser },
-        userInfo,
-      });
-
-      expect(result).toEqual({ message: 'Senha alterada com sucesso' });
-      expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
-      expect(usersRepository.merge).toBeCalledTimes(1);
-      expect(usersRepository.save).toBeCalledTimes(1);
-    });
-
-    it('should hash a sended password', async () => {
       await usersService.update({
         id: updateUserId,
         data: { ...updateUser },
         userInfo,
       });
 
+      expect(usersRepository.findOneOrFail).toBeCalledTimes(1);
       expect(encryptor.hashSync).toBeCalledTimes(1);
+      expect(usersRepository.merge).toBeCalledTimes(1);
+      expect(usersRepository.save).toBeCalledTimes(1);
     });
 
     it('should throw forbidden exception error', () => {
