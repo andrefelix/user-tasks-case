@@ -12,15 +12,11 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TasksEntity } from 'src/modules/tasks/entity/tasks.entity';
 import { TasksController } from 'src/modules/tasks/tasks.controller';
 import { TasksService } from 'src/modules/tasks/tasks.service';
-import { mockUserEntity } from 'src/helpers/test-helpers';
 import { TaskDTO } from 'src/modules/tasks/dto/task.dto';
 
 const BASE_URL = '/api/v1/tasks';
-const taskEntity: TasksEntity = {
-  id: 'any.id',
-  name: 'any task name',
-  user: { ...mockUserEntity },
-};
+const taskEntity = { id: 'any.id', name: 'any task name' } as TasksEntity;
+const taskEntityList = [taskEntity];
 
 describe('TasksController', () => {
   let app: INestApplication;
@@ -44,6 +40,7 @@ describe('TasksController', () => {
           provide: TasksService,
           useValue: {
             create: jest.fn().mockResolvedValue(taskEntity),
+            findAll: jest.fn().mockResolvedValue(taskEntityList),
           },
         },
         JwtStrategy,
@@ -80,10 +77,7 @@ describe('TasksController', () => {
         .post(BASE_URL)
         .set('Authorization', mockHeaderAuthorization)
         .send(createTask)
-        .expect(HttpStatus.CREATED)
-        .expect((res) => {
-          expect(res.body).toEqual(taskEntity);
-        });
+        .expect(HttpStatus.CREATED, taskEntity);
     });
 
     it('should throw not found exception when current user is not founded', () => {
@@ -107,6 +101,26 @@ describe('TasksController', () => {
         .post(BASE_URL)
         .set('Authorization', mockHeaderAuthorization)
         .expect(HttpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe('/GET findAll', () => {
+    it('should return a task list', () => {
+      return request(app.getHttpServer())
+        .get(BASE_URL)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.OK, taskEntityList);
+    });
+
+    it('should throw not found exception when current user is not founded', () => {
+      jest
+        .spyOn(tasksService, 'findAll')
+        .mockRejectedValueOnce(new NotFoundException());
+
+      return request(app.getHttpServer())
+        .get(BASE_URL)
+        .set('Authorization', mockHeaderAuthorization)
+        .expect(HttpStatus.NOT_FOUND);
     });
   });
 });
