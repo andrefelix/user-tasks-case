@@ -31,7 +31,7 @@ describe('TasksService', () => {
         {
           provide: getRepositoryToken(UsersEntity),
           useValue: {
-            findOneOrFail: jest.fn().mockResolvedValue({}),
+            findOneOrFail: jest.fn().mockResolvedValue({ tasks: [] }),
             save: jest.fn(),
             findOne: jest.fn().mockResolvedValue({
               ...mockUserEntity,
