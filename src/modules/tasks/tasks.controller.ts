@@ -43,7 +43,7 @@ export class TasksController {
   @Post()
   @ApiOperation({ summary: 'Cria uma nova task' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Task criada com sucesso',
     type: TasksEntity,
   })
