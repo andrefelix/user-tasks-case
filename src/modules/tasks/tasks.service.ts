@@ -41,6 +41,7 @@ export class TasksService {
     try {
       user = await this.usersRepository.findOneOrFail({
         where: { id: authenticatedUser.id },
+        relations: { tasks: true },
       });
     } catch (error) {
       throw new NotFoundException(MESSAGE.notFoundUser);
@@ -49,7 +50,7 @@ export class TasksService {
     const task = this.tasksRepository.create(data);
     await this.tasksRepository.save(task);
 
-    user.tasks = [task];
+    user.tasks.push(task);
 
     await this.usersRepository.save(user);
 
